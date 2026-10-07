@@ -1,0 +1,11 @@
+# WebSocket server
+websockets
+
+# WebSocket text client
+websocket-client
+rel
+
+# HTTP server
+Flask
+flask-cors
+ifcopenshell

@@ -1,0 +1,590 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AD BIM Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            user-select: none;
+        }
+
+        #xeokit_canvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: lightblue;
+            background-image: linear-gradient(lightblue, white);
+        }
+
+        #n_value {
+            position: absolute;
+            top: 90px;
+            left: 400px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #length {
+            position: absolute;
+            top: 130px;
+            left: 400px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #width {
+            position: absolute;
+            top: 170px;
+            left: 400px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #floors {
+            position: absolute;
+            top: 210px;
+            left: 400px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #benchmarkButton {
+            position: absolute;
+            top: 270px;
+            left: 400px;
+            z-index: 10;
+            padding: 10px 16px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        #benchmarkButton:hover {
+            background-color: #c9302c;
+        }
+
+        #n_value_label {
+            position: absolute;
+            top: 90px;
+            left: 600px;
+            z-index: 10;
+            padding: 10px 16px;
+            width: 150px;
+        }
+
+        #length_label {
+            position: absolute;
+            top: 130px;
+            left: 600px;
+            z-index: 10;
+            padding: 10px 16px;
+            width: 150px;
+        }
+
+        #width_label {
+            position: absolute;
+            top: 170px;
+            left: 600px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #floors_label {
+            position: absolute;
+            top: 210px;
+            left: 600px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #user_mode {
+            position: absolute;
+            top: 30px;
+            left: 500px;
+            z-index: 10;
+        }
+
+        #client_model {
+            position: absolute;
+            top: 270px;
+            left: 400px;
+            z-index: 10;
+        }
+
+        #reloadButton {
+            position: absolute;
+            top: 270px;
+            left: 550px;
+            z-index: 10;
+            visibility: hidden;
+        }
+
+        #gridButton {
+            position: absolute;
+            top: 20px;
+            left: -100px;
+            z-index: 10;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            opacity: 0.5;
+            font-size: xx-large;
+        }
+
+        #cameraButton {
+            position: absolute;
+            top: 100px;
+            left: -100px;
+            z-index: 10;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            opacity: 0.5;
+            font-size: xx-large;
+        }
+
+
+        #measureButton {
+            position: absolute;
+            top: 180px;
+            left: -100px;
+            z-index: 10;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            opacity: 0.5;
+            font-size: xx-large;
+        }
+
+        #propertiesButton {
+            position: absolute;
+            top: 260px;
+            left: -100px;
+            z-index: 10;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            opacity: 0.5;
+            font-size: xx-large;
+        }
+
+        #treeButton {
+            position: absolute;
+            top: 20px;
+            left: 390px;
+            z-index: 10;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            opacity: 0.5;
+            font-size: xx-large;
+        }
+
+        #connectionLabel {
+            position: absolute;
+            bottom: 50px;
+            left: 400px;
+            width: 200px;
+            z-index: 10;
+            visibility: hidden;
+        }
+
+        #retryButton {
+            position: absolute;
+            bottom: 50px;
+            left: 600px;
+            z-index: 10;
+            visibility: hidden;
+        }
+
+        /* ----------------------------------------------------------------------------------------------------------*/
+        /* TreeViewPlugin */
+        /* ----------------------------------------------------------------------------------------------------------*/
+
+        #treeViewWrapper {
+            width: 350px;
+            height: 100vh;
+            transition: transform 0.3s ease;
+            overflow: visible;
+        }
+
+        #treeViewContainer {
+            pointer-events: all;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: auto;
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            color: black;
+            top: 0px;
+            z-index: 200000;
+            float: left;
+            left: 0;
+            padding-left: 10px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 15px;
+            user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            width: 350px;
+        }
+
+        #treeViewContainer ul {
+            list-style: none;
+            padding-left: 1.75em;
+            pointer-events: none;
+        }
+
+        #treeViewContainer ul li {
+            position: relative;
+            width: 500px;
+            pointer-events: none;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            vertical-align: middle;
+        }
+
+        #treeViewContainer ul li a {
+            background-color: #eee;
+            border-radius: 50%;
+            color: #000;
+            display: inline-block;
+            height: 1.5em;
+            left: -1.5em;
+            position: absolute;
+            text-align: center;
+            text-decoration: none;
+            width: 1.5em;
+            pointer-events: all;
+        }
+
+        #treeViewContainer ul li a.plus {
+            background-color: #ded;
+            pointer-events: all;
+        }
+
+        #treeViewContainer ul li a.minus {
+            background-color: #eee;
+            pointer-events: all;
+        }
+
+        #treeViewContainer ul li a:active {
+            top: 1px;
+            pointer-events: all;
+        }
+
+        #treeViewContainer ul li span:hover {
+            color: white;
+            cursor: pointer;
+            background: black;
+            padding-left: 2px;
+            pointer-events: all;
+        }
+
+        #treeViewContainer ul li span {
+            display: inline-block;
+            width: calc(100% - 50px);
+            padding-left: 2px;
+            pointer-events: all;
+            height: 23px;
+        }
+
+        #treeViewContainer .highlighted-node {
+            /* Appearance of node highlighted with TreeViewPlugin#showNode() */
+            border: black solid 1px;
+            background: yellow;
+            color: black;
+            padding-left: 1px;
+            padding-right: 5px;
+            pointer-events: all;
+        }
+
+        #treeViewWrapper.closed {
+            transform: translateX(-360px);
+        }
+
+        #myAxisGizmoCanvas {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            bottom: 20px;
+            left: -140px;
+            z-index: 200000;
+        }
+
+        #myNavCubeCanvas {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            bottom: 20px;
+            left: -300px;
+            z-index: 200000;
+        }
+
+        /* ----------------------------------------------------------------------------------------------------------*/
+        /* Context menu */
+        /* ----------------------------------------------------------------------------------------------------------*/
+
+        .xeokit-context-menu {
+            font-family: 'Roboto', sans-serif;
+            font-size: 15px;
+            display: none;
+            z-index: 300000;
+            background: rgba(255, 255, 255, 0.46);
+            border: 1px solid black;
+            border-radius: 6px;
+            padding: 0;
+            width: 200px;
+        }
+
+        .xeokit-context-menu ul {
+            list-style: none;
+            margin-left: 0;
+            padding: 0;
+        }
+
+        .xeokit-context-menu-item {
+            list-style-type: none;
+            padding-left: 10px;
+            padding-right: 20px;
+            padding-top: 4px;
+            padding-bottom: 4px;
+            color: black;
+            background: rgba(255, 255, 255, 0.46);
+            cursor: pointer;
+            width: calc(100% - 30px);
+        }
+
+        .xeokit-context-menu-item:hover {
+            background: black;
+            color: white;
+            font-weight: normal;
+        }
+
+        .xeokit-context-menu-item span {
+            display: inline-block;
+        }
+
+        .xeokit-context-menu .disabled {
+            display: inline-block;
+            color: gray;
+            cursor: default;
+            font-weight: normal;
+        }
+
+        .xeokit-context-menu .disabled:hover {
+            color: gray;
+            cursor: default;
+            background: #eeeeee;
+            font-weight: normal;
+        }
+
+        .xeokit-context-menu-item-separator {
+            background: rgba(0, 0, 0, 1);
+            height: 1px;
+            width: 100%;
+        }
+
+        /* ----------------------------------------------------------------------------------------------------------*/
+        /* Properties Bar */
+        /* ----------------------------------------------------------------------------------------------------------*/
+
+        #propertiesBar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 320px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: visible;
+        }
+
+        #propertiesBar.closed {
+            transform: translateX(100%);
+        }
+
+        .propertiesBar-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            height: 100%;
+        }
+
+        .propertiesBar-group .category {
+            margin-bottom: 24px;
+            font-weight: bold;
+            font-size: x-large;
+        }
+
+        .propertiesBar-group .text {
+            margin-bottom: 6px;
+        }
+
+        .propertiesBar-group .attribute-link {
+            color: #0066cc;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .propertiesBar-group .attribute-link:hover {
+            color: #004499;
+        }
+
+        .propertiesBar-group .attribute-link:active {
+            color: #002266;
+        }
+
+        .propertiesBar-group .highlighted-node {
+            background: yellow;
+            color: black;
+        }
+
+        .propertiesBar-group input,
+        .propertiesBar-group select,
+        .propertiesBar-group button {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="xeokit_canvas"></canvas>
+    <div id="treeViewWrapper" class="closed">
+        <button id="treeButton" title="Tree view">🌳</button>
+
+        <div id="treeViewContainer"></div>
+
+        <select name="user_mode" id="user_mode">
+            <option value="designer">Designer</option>
+            <option value="client">Client</option>
+        </select>
+
+        <input type="range" id="n_value" name="n_value" min="2.7" max="6.7" value="3.1" step="0.2" />
+        <input type="range" id="length" name="length" min="2.7" max="6.7" value="2.9" step="0.2" />
+        <input type="range" id="width" name="width" min="17.8" max="30.8" value="17.8" step="1" />
+        <input type="range" id="floors" name="floors" min="8.8" max="30.8" value="8.8" step="1" />
+
+        <label id="n_value_label">Ground Floor Height</label>
+        <label id="length_label">1st Floor Height</label>
+        <label id="width_label">Length</label>
+        <label id="floors_label">Width</label>
+
+        <select name="client_model" id="client_model">
+            <option value="duplex">Duplex</option>
+            <option value="skyscraper">Skyscraper</option>
+            <option value="cayan">Cayan Tower</option>
+            <option value="isenberg">Isenberg</option>
+        </select>
+
+        <button id="reloadButton">Reload</button>
+
+        <label id="connectionLabel">Connection to server failed</label>
+        <button id="retryButton">Retry</button>
+    </div>
+
+    <div id="propertiesBar" class="closed">
+
+        <button id="gridButton" title="Toggle grid">🌐</button>
+        <button id="cameraButton" title="Toggle perspective/ortho">🔭</button>
+        <button id="measureButton" title="Measure distances">📏</button>
+        <button id="propertiesButton" title="Inspect properties">ℹ️</button>
+
+        <canvas id="myAxisGizmoCanvas"></canvas>
+        <canvas id="myNavCubeCanvas"></canvas>
+
+        <div class="propertiesBar-group">
+            <label class="category">
+                Properties
+            </label>
+
+            <label class="text" id="propertiesBar.none_selected">
+                No object selected.
+            </label>
+
+            <label class="text" id="propertiesBar.name"></label>
+            <label class="text" id="propertiesBar.category"></label>
+
+            <div id="propertiesBar.attributeList"></div>
+
+            <p></p>
+
+            <label class="category">
+                Materials
+            </label>
+
+            <div id="propertiesBar.materialList"></div>
+
+            <p></p>
+
+            <label class="category">
+                Wall Types
+            </label>
+
+            <div id="propertiesBar.wallTypeList"></div>
+
+            <p></p>
+
+            <label class="category">
+                Slab Types
+            </label>
+
+            <div id="propertiesBar.slabTypeList"></div>
+
+            <p></p>
+
+            <label class="category">
+                Beam Types
+            </label>
+
+            <div id="propertiesBar.beamTypeList"></div>
+
+            <p></p>
+
+            <label class="category">
+                Column Types
+            </label>
+
+            <div id="propertiesBar.columnTypeList"></div>
+
+            <p></p>
+
+            <label class="category">
+                Stair Types
+            </label>
+
+            <div id="propertiesBar.stairTypeList"></div>
+        </div>
+
+    </div>
+</body>
+<script id="source" type="module" src="./viewer.js"></script>
+
+</html>
