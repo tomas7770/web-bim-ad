@@ -11,7 +11,12 @@ import numpy
 import math
 import time
 from cayan import rotate, dist
-from isenberg import add, scale
+
+def add(u, v):
+    return (u[0] + v[0], u[1] + v[1])
+
+def scale(u, a):
+    return (u[0] * a, u[1] * a)
 
 def createLevel(i, elevation):
     global model

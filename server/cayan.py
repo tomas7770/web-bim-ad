@@ -157,7 +157,7 @@ def tower():
 
     reinforcedConcrete = createMaterial(
         albedo = (0.5, 0.5, 0.5),
-        texturePath = "./ignore/concrete-2500-mm-architextures.jpg",
+        texturePath = "./textures/concrete-2500-mm-architextures.jpg",
         name = "Reinforced Concrete"
     )
 
@@ -194,7 +194,7 @@ def tower():
         (-icHalfLength, -icHalfLength),
     ], material = reinforcedConcrete)
 
-    concrete = createMaterial(texturePath = "./ignore/concrete-2500-mm-architextures.jpg", name = "Concrete")
+    concrete = createMaterial(texturePath = "./textures/concrete-2500-mm-architextures.jpg", name = "Concrete")
     slabType = createSlabType(material = concrete)
 
     glass = createMaterial(opacity = 0.5)

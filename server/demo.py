@@ -71,13 +71,13 @@ def test():
     albedoMaterial = createMaterial(albedo = (1.0, 0.5, 0))
 
     # Material with texture
-    textureMaterial = createMaterial(texturePath = "./ignore/uvGrid2.jpg")
+    textureMaterial = createMaterial(texturePath = "./textures/uvGrid2.jpg")
 
     # Material with scaled texture
-    scaledTextureMaterial = createMaterial(texturePath = "./ignore/uvGrid2.jpg", xScale = -2, yScale = 0.5)
+    scaledTextureMaterial = createMaterial(texturePath = "./textures/uvGrid2.jpg", xScale = -2, yScale = 0.5)
 
     # Full material
-    fullMaterial = createMaterial(albedo = (1, 0, 0), texturePath = "./ignore/uvGrid2.jpg", xScale = 2, yScale = 0.5)
+    fullMaterial = createMaterial(albedo = (1, 0, 0), texturePath = "./textures/uvGrid2.jpg", xScale = 2, yScale = 0.5)
 
     ## Slab types
 
@@ -137,7 +137,7 @@ def testOpenings():
 
     ## Materials
 
-    material = createMaterial(texturePath = "./ignore/uvGrid2.jpg")
+    material = createMaterial(texturePath = "./textures/uvGrid2.jpg")
 
     ## Slabs
 

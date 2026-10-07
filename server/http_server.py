@@ -5,8 +5,8 @@ import skyscraper as skyscraperCode
 import ifc.skyscraper as skyscraperIfc
 import cayan as cayanCode
 import ifc.cayan as cayanIfc
-import isenberg as isenbergCode
-import ifc.isenberg as isenbergIfc
+#import isenberg as isenbergCode
+#import ifc.isenberg as isenbergIfc
 
 output_str = ""
 
