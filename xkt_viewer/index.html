@@ -1,0 +1,235 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xeokit Example</title>
+    <style>
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            user-select: none;
+        }
+
+        #xeokit_canvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: lightblue;
+            background-image: linear-gradient(lightblue, white);
+        }
+
+        #n_value {
+            position: absolute;
+            top: 20px;
+            left: 400px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #length {
+            position: absolute;
+            top: 60px;
+            left: 400px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #width {
+            position: absolute;
+            top: 100px;
+            left: 400px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #floors {
+            position: absolute;
+            top: 140px;
+            left: 400px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #benchmarkButton {
+            position: absolute;
+            top: 220px;
+            left: 400px;
+            z-index: 10;
+            padding: 10px 16px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        #benchmarkButton:hover {
+            background-color: #c9302c;
+        }
+
+        #n_value_label {
+            position: absolute;
+            top: 20px;
+            left: 600px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #length_label {
+            position: absolute;
+            top: 60px;
+            left: 600px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #width_label {
+            position: absolute;
+            top: 100px;
+            left: 600px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+
+        #floors_label {
+            position: absolute;
+            top: 140px;
+            left: 600px;
+            z-index: 10;
+            padding: 10px 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="xeokit_canvas"></canvas>
+
+    <input type="range" id="n_value" name="n_value" min="1" max="10" value="1" step="1" />
+    <input type="range" id="length" name="length" min="1" max="10" value="5" step="1" />
+    <input type="range" id="width" name="width" min="1" max="10" value="5" step="1" />
+    <input type="range" id="floors" name="floors" min="1" max="10" value="1" step="1" />
+    <button id="benchmarkButton">Benchmark</button>
+
+    <label id="n_value_label">Buildings</label>
+    <label id="length_label">Length</label>
+    <label id="width_label">Width</label>
+    <label id="floors_label">Floors</label>
+</body>
+<script id="source" type="module">
+
+    import {XKTLoaderPlugin, Viewer, TreeViewPlugin} from "./xeokit-sdk.min.es.js";
+
+    //------------------------------------------------------------------------------------------------------------------
+    // 1. Create a Viewer,
+    // 2. Arrange the camera
+    //------------------------------------------------------------------------------------------------------------------
+
+    // 1
+    const viewer = new Viewer({
+        canvasId: "xeokit_canvas",
+        transparent: true
+    });
+
+    // 2
+    viewer.camera.eye = [-2.56, 8.38, 8.27];
+    viewer.camera.look = [13.44, 3.31, -14.83];
+    viewer.camera.up = [0.10, 0.98, -0.14];
+
+    //------------------------------------------------------------------------------------------------------------------
+    // XKT
+    //------------------------------------------------------------------------------------------------------------------
+
+    const xktLoader = new XKTLoaderPlugin(viewer);
+    let model = null; // <--- We'll store the model reference here
+    var model_i = 0;
+
+    function loadModel(customParams, n, floors) {
+        if (!customParams) {
+            n = document.getElementById("n_value").value;
+            floors = document.getElementById("floors").value;
+        }
+
+        let oldModel = model;
+
+        const startTime = performance.now();
+        model = xktLoader.load({
+            id: `myModel${model_i}`,
+            src: "skyscraper.xkt",
+            edges: true,
+        });
+        model.on("loaded", () => {
+            const endTime = performance.now();
+            console.log(`Total time with n=${n}, floors=${floors}: ${endTime - startTime} ms`);
+
+            if (oldModel) {
+                oldModel.destroy()
+            }
+        });
+        model_i += 1;
+    }
+
+    loadModel()
+
+    //------------------------------------------------------------------------------------------------------------------
+    // --- UI Handlers ---
+    //------------------------------------------------------------------------------------------------------------------
+
+    function updateModel() {
+        if (model) {
+            loadModel();
+        } else {
+            console.warn("No model to destroy!");
+        }
+    }
+
+    function benchmarkStep(n, floors) {
+        model.on("loaded", async () => {
+            await new Promise(r => setTimeout(r, 100)); // "sleep" to give both the viewer and server a slight cooldown
+            if (floors >= 10) {
+                floors = 1;
+                n += 1;
+            } else {
+                floors += 1;
+            }
+            if (n <= 4) {
+                loadModel(true, n, floors);
+                return benchmarkStep(n, floors);
+            }
+        });
+    }
+
+    document.getElementById("n_value").addEventListener("input", () => {
+        updateModel();
+    });
+
+    document.getElementById("length").addEventListener("input", () => {
+        updateModel();
+    });
+
+    document.getElementById("width").addEventListener("input", () => {
+        updateModel();
+    });
+
+    document.getElementById("floors").addEventListener("input", () => {
+        updateModel();
+    });
+
+    document.getElementById("benchmarkButton").addEventListener("click", () => {
+        if (model) {
+            var n = 1;
+            var floors = 1;
+            loadModel(true, n, floors);
+
+            benchmarkStep(n, floors);
+        }
+    });
+
+</script>
+
+</html>
